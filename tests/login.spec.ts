@@ -1,136 +1,113 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
-test.describe('User Authentication on Swag Labs', () => {
+test.describe('User Authentication on Swag Labs (POM learn)', () => {
 
   //Array storing all valid usernames that should Login successfully
-  const validUsers = ['standard_user',
-    'problem_user',
-    'performance_glitch_user',
-    'visual_user'];
+  const validUsers = ['standard_user', 'problem_user', 'performance_glitch_user', 'visual_user'];
 
   //Loop through the array of valid users and create a test for each one
   validUsers.forEach((username) => {
     test(`Successful login with valid credentials - ${username}`, async ({ page }) => {
+      // Instantiate the page object
+      const loginPage = new LoginPage(page);
       // Navigate to the login page
-      await page.goto('https://www.saucedemo.com/');
-
+      await loginPage.navigateTo();
       // Fill out and submit credentials
-      await page.locator('[data-test="username"]').fill(username);
-      await page.locator('[data-test="password"]').fill('secret_sauce');
-      await page.locator('[data-test="login-button"]').click();
-
+      await loginPage.login(username, 'secret_sauce');
       // Verify redirection to the inventory page
       await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
     });
   });
 
   test('Unsuccessful login with a locked out user', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navigate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Fill out and submit credentials
-    await page.locator('[data-test="username"]').fill('locked_out_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.login(`locked_out_user`, `secret_sauce`);
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('Epic sadface: Sorry, this user has been locked out.');
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Epic sadface: Sorry, this user has been locked out.');
   });
 
   test('Epic sadface: Username is required - Blank data', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navigate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Attempt to login without entering any credentials
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.loginButton.click();
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('Epic sadface: Username is required');
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Epic sadface: Username is required');
   });
 
   test('Epic sadface: Username is required', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navigate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Attempt to login without entering a username
-    await page.locator('[data-test="password"]').fill('secret_sauce');
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.login(``, 'secret_sauce');
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('Epic sadface: Username is required');
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Epic sadface: Username is required');
   });
 
   test('Epic sadface: Password is required', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navigate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Attempt to login without entering a password
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.login('standard_user', '');
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('Epic sadface: Password is required');
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Epic sadface: Password is required');
   });
 
   test('Epic sadface: Username do not match any user in this service', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navigate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Attempt to login with an invalid username
-    await page.locator('[data-test="username"]').fill('wrong user');
-    await page.locator('[data-test="password"]').fill("secret_sauce");
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.login('wrong user', 'secret_sauce');
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('Epic sadface: Username and password do not match any user in this service');
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Epic sadface: Username and password do not match any user in this service');
   });
 
   //Loop through the array of valid users and create a test for each one
   validUsers.forEach((username) => {
     test(`Epic sadface: Password do not match any user in this service - ${username}`, async ({ page }) => {
+      // Instantiate the page object
+      const loginPage = new LoginPage(page);
       // Navigate to the login page
-      await page.goto('https://www.saucedemo.com/');
-
+      await loginPage.navigateTo();
       // Attempt to login with an invalid password
-      await page.locator('[data-test="username"]').fill(username);
-      await page.locator('[data-test="password"]').fill("wrongpassword");
-      await page.locator('[data-test="login-button"]').click();
-
+      await loginPage.login(username, 'wrongpassword');
       // Verify the error message
-      const errorMessage = page.locator('[data-test="error"]');
-      await expect(errorMessage).toBeVisible();
-      await expect(errorMessage).toContainText('Epic sadface: Username and password do not match any user in this service');
+      await expect(loginPage.errorMessage).toBeVisible();
+      await expect(loginPage.errorMessage).toContainText('Epic sadface: Username and password do not match any user in this service');
     });
   });
 
-
-  test('Close error button', async ({ page }) => {
+  test('Should dismiss the error message when clicking the close button', async ({ page }) => {
+    // Instantiate the page object
+    const loginPage = new LoginPage(page);
     // Navegate to the login page
-    await page.goto('https://www.saucedemo.com/');
-
+    await loginPage.navigateTo();
     // Trigger an error message by clicking Login with empety fields
-    await page.locator('[data-test="login-button"]').click();
-
+    await loginPage.loginButton.click();
     // Verify the error message
-    const errorMessage = page.locator('[data-test="error"]');
-    await expect(errorMessage).toBeVisible();
-
+    await expect(loginPage.errorMessage).toBeVisible();
     // Click the "X" close button to dismiss the error
-    await page.locator('[data-test="error-button"]').click();
-
+    await loginPage.clickCloseError();
     // Verify that the error message is no longer visible
-    await expect(errorMessage).not.toBeVisible();
+    await expect(loginPage.errorMessage).not.toBeVisible();
   });
 
 });
-
