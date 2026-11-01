@@ -5,6 +5,7 @@ test.describe('User Authentication on Swag Labs (POM learn)', () => {
 
   //Array storing all valid usernames that should Login successfully
   const validUsers = ['standard_user', 'problem_user', 'performance_glitch_user', 'visual_user'];
+  const password = process.env.SAUCE_PASSWORD || 'secret_sauce'
 
   //Loop through the array of valid users and create a test for each one
   validUsers.forEach((username) => {
@@ -14,7 +15,7 @@ test.describe('User Authentication on Swag Labs (POM learn)', () => {
       // Navigate to the login page
       await loginPage.navigateTo();
       // Fill out and submit credentials
-      await loginPage.login(username, 'secret_sauce');
+      await loginPage.login(username, password);
       // Verify redirection to the inventory page
       await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
     });
@@ -26,7 +27,7 @@ test.describe('User Authentication on Swag Labs (POM learn)', () => {
     // Navigate to the login page
     await loginPage.navigateTo();
     // Fill out and submit credentials
-    await loginPage.login(`locked_out_user`, `secret_sauce`);
+    await loginPage.login(`locked_out_user`, password);
     // Verify the error message
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText('Epic sadface: Sorry, this user has been locked out.');
@@ -50,7 +51,7 @@ test.describe('User Authentication on Swag Labs (POM learn)', () => {
     // Navigate to the login page
     await loginPage.navigateTo();
     // Attempt to login without entering a username
-    await loginPage.login(``, 'secret_sauce');
+    await loginPage.login(``, password);
     // Verify the error message
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText('Epic sadface: Username is required');
@@ -74,7 +75,7 @@ test.describe('User Authentication on Swag Labs (POM learn)', () => {
     // Navigate to the login page
     await loginPage.navigateTo();
     // Attempt to login with an invalid username
-    await loginPage.login('wrong user', 'secret_sauce');
+    await loginPage.login('wrong user', password);
     // Verify the error message
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText('Epic sadface: Username and password do not match any user in this service');
